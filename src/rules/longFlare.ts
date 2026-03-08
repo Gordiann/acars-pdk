@@ -26,9 +26,12 @@ export default class LongFlareRule implements Rule {
       Acars.StartTimer('long_flare')
     }
 
-    if (data.onGround == true && Acars.IsTimeElapsed('long_flare', 10000)) {
+    if (data.onGround == true && Acars.TimeElapsed('long_flare') > 0) {
+      const violated = Acars.IsTimeElapsed('long_flare', 10000)
       Acars.StopTimer('long_flare')
-      return ['Flare lasted longer than 10 seconds']
+      if (violated) {
+        return ['Flare lasted longer than 10 seconds']
+      }
     }
   }
 }

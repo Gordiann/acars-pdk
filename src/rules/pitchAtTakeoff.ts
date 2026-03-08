@@ -10,7 +10,7 @@ export default class PitchAtTakeoffRule implements Rule {
     id: 'PITCH_AT_TAKEOFF',
     name: 'Excessive pitch at takeoff',
     enabled: true,
-    message: 'Pitch exceeded 8.5 degrees at liftoff',
+    message: 'Pitch exceeded 15 degrees at liftoff',
     states: [PirepState.Takeoff],
     repeatable: false,
     points: -5,
@@ -18,8 +18,8 @@ export default class PitchAtTakeoffRule implements Rule {
 
   violated(pirep: Pirep, data: Telemetry, previousData?: Telemetry): RuleValue {
     if (data.onGround == false && previousData?.onGround == true) {
-      if (data.pitch > 8.5) {
-        return [`Pitch at liftoff was ${data.pitch.toFixed(1)} degrees (max 8.5)`]
+      if (data.pitch > 15) {
+        return [`Pitch at liftoff was ${data.pitch.toFixed(1)} degrees (max 15)`]
       }
     }
   }
