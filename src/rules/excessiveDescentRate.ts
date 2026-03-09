@@ -20,7 +20,12 @@ export default class ExcessiveDescentRateRule implements Rule {
 
   violated(pirep: Pirep, data: Telemetry, previousData?: Telemetry): RuleValue {
     const alt = data.groundAltitude.Feet
-    const vs = Math.abs(data.verticalSpeed.FeetPerMinute)
+    const vs = data.verticalSpeed.FeetPerMinute
+
+    // Only check when actually descending
+    if (vs >= 0) return
+
+    const descentRate = Math.abs(vs)
 
     let maxRate = 0
     let band = ''
@@ -45,9 +50,9 @@ export default class ExcessiveDescentRateRule implements Rule {
     if (maxRate == 0) return
 
     return Acars.ViolatedAfterDelay('excessive_descent', 6000, () => {
-      if (vs > maxRate) {
+      if (descentRate > maxRate) {
         return [
-          `Descent rate ${vs.toFixed(0)} fpm exceeds ${maxRate} fpm limit at ${band}`,
+          `Descent rate ${descentRate.toFixed(0)} fpm exceeds ${maxRate} fpm limit at ${band}`,
         ]
       }
       return false

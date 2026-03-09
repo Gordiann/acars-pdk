@@ -15,7 +15,7 @@ export default class FlightCompletionBonusRule implements Rule {
     repeatable: false,
     cooldown: 60,
     max_count: 1,
-    points: 5,
+    points: 100,
   }
 
   violated(pirep: Pirep, data: Telemetry, previousData?: Telemetry): RuleValue {
