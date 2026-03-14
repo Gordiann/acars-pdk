@@ -25,6 +25,6 @@ export default class SmoothLandingRule implements Rule {
     if (absRate > absParam) {
       return
     }
-    return [`Smooth landing! Rate=${absRate}, threshold=${absParam}. Bonus: +`]
+    return [`Smooth landing! Rate=${Math.round(absRate)}, threshold=${absParam}. Bonus: +`]
   }
 }
