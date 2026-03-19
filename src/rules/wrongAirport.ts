@@ -21,7 +21,7 @@ export default class WrongAirportRule implements Rule {
 
   violated(pirep: Pirep, data: Telemetry): RuleValue {
     const actDest = data.runway?.icao
-    if (actDest == undefined) return
+    if (!actDest) return
 
     const allowed = new Set<string>()
 
