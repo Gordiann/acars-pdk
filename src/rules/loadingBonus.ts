@@ -26,8 +26,17 @@ export default class PayloadRule implements Rule {
         : 0
     const acPayload =
       data.payloadWeight.Kilograms != 0
-        ? data.payloadWeight.Kilograms - data.fuelQuantity.Kilograms
+        ? data.payloadWeight.Kilograms
         : 0
+
+    Acars.AddPirepLogOnce(
+      'LOADING_BONUS_DEBUG',
+      `Loading debug: fpPayload=${fpPayload}, acPayload=${acPayload}, rawPayloadWeight=${data.payloadWeight.Kilograms}, fuelQty=${data.fuelQuantity.Kilograms}`,
+    )
+
+    if (fpPayload == 0 || acPayload == 0) {
+      return
+    }
 
     const violated = Acars.NumberWithinPercent(acPayload, fpPayload, 15)
 

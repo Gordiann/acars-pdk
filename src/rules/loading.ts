@@ -26,7 +26,7 @@ export default class InaccurateLoadingRule implements Rule {
         : 0
     const acPayload =
       data.payloadWeight.Kilograms != 0
-        ? data.payloadWeight.Kilograms - data.fuelQuantity.Kilograms
+        ? data.payloadWeight.Kilograms
         : 0
 
     if (fpPayload == 0 || acPayload == 0) {
