@@ -20,10 +20,8 @@ export default class PayloadRule implements Rule {
   }
 
   violated(pirep: Pirep, data: Telemetry, previousData?: Telemetry): RuleValue {
-    const fpPayload =
-      pirep.flightPlan && pirep.flightPlan.simBriefFlightPlan
-        ? pirep.flightPlan.simBriefFlightPlan.weights.payload
-        : 0
+    const sbWeights = pirep.flightPlan?.simBriefFlightPlan?.weights
+    const fpPayload = sbWeights ? sbWeights.payload : 0
     const acPayload =
       data.payloadWeight.Kilograms != 0
         ? data.payloadWeight.Kilograms
@@ -31,7 +29,7 @@ export default class PayloadRule implements Rule {
 
     Acars.AddPirepLogOnce(
       'LOADING_BONUS_DEBUG',
-      `Loading debug: fpPayload=${fpPayload}, acPayload=${acPayload}, rawPayloadWeight=${data.payloadWeight.Kilograms}, fuelQty=${data.fuelQuantity.Kilograms}`,
+      `Loading debug: hasFlightPlan=${!!pirep.flightPlan}, simbriefId=${pirep.flightPlan?.simbriefId ?? 'null'}, hasSimBriefFP=${!!pirep.flightPlan?.simBriefFlightPlan}, fpPayload=${fpPayload}, cargoKg=${pirep.flightPlan?.cargoWeight?.Kilograms ?? 'null'}, paxCount=${pirep.flightPlan?.passengersCount ?? 'null'}, acPayload=${acPayload}`,
     )
 
     if (fpPayload == 0 || acPayload == 0) {
