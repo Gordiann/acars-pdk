@@ -11,7 +11,7 @@ export default class AlternateBonusRule implements Rule {
     name: 'Land at alternate',
     enabled: true,
     message: 'Land at alternate',
-    states: [PirepState.Landed],
+    states: [PirepState.Landed, PirepState.OnBlock],
     repeatable: false,
     cooldown: 60,
     max_count: 3,

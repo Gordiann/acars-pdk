@@ -11,7 +11,7 @@ export default class SmoothLandingRule implements Rule {
     name: 'Smooth landing',
     enabled: true,
     message: 'Smooth landing',
-    states: [PirepState.TaxiIn, PirepState.Landed],
+    states: [PirepState.TaxiIn, PirepState.Landed, PirepState.OnBlock],
     repeatable: false,
     cooldown: 60,
     max_count: 3,

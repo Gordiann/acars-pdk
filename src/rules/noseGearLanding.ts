@@ -11,7 +11,7 @@ export default class NoseGearLandingRule implements Rule {
     name: 'Nose gear landing',
     enabled: true,
     message: 'Landed on nose gear',
-    states: [PirepState.Landed],
+    states: [PirepState.Landed, PirepState.OnBlock],
     repeatable: false,
     points: -5,
   }

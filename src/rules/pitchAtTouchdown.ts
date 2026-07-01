@@ -11,7 +11,7 @@ export default class PitchAtTouchdownRule implements Rule {
     name: 'Excessive pitch at touchdown',
     enabled: true,
     message: 'Pitch exceeded 8 degrees at touchdown',
-    states: [PirepState.Landed],
+    states: [PirepState.Landed, PirepState.OnBlock],
     repeatable: false,
     points: -5,
   }
