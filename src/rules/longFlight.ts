@@ -21,7 +21,7 @@ export default class LongFlightRule implements Rule {
   }
 
   violated(pirep: Pirep, data: Telemetry, previousData?: Telemetry): RuleValue {
-    const absDistance = Math.abs(pirep.actualDistance.Miles)
+    const absDistance = Math.round(Math.abs(pirep.actualDistance.Miles))
     const absParam = Math.abs(this.meta.parameter)
     if (absDistance < absParam) {
       return
