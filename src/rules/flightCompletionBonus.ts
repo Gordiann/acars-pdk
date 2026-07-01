@@ -11,7 +11,7 @@ export default class FlightCompletionBonusRule implements Rule {
     name: 'Flight completion bonus',
     enabled: true,
     message: 'Flight completion bonus',
-    states: [PirepState.TaxiIn, PirepState.Landed],
+    states: [PirepState.Landed, PirepState.TaxiIn, PirepState.OnBlock],
     repeatable: false,
     cooldown: 60,
     max_count: 1,
