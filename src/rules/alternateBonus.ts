@@ -20,7 +20,7 @@ export default class AlternateBonusRule implements Rule {
   }
 
   violated(pirep: Pirep, data: Telemetry): RuleValue {
-    const actDest = data.runway?.icao
+    const actDest = pirep.arrivalAirport?.icao
     if (!actDest) return
 
     const alternates = new Set<string>()

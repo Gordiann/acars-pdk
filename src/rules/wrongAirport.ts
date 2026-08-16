@@ -12,7 +12,7 @@ export default class WrongAirportRule implements Rule {
     name: 'Wrong airport landing',
     enabled: true,
     message: 'Landed at wrong airport',
-    states: [PirepState.Landed],
+    states: [PirepState.TaxiIn, PirepState.OnBlock],
     repeatable: false,
     cooldown: 60,
     max_count: 1,
@@ -20,13 +20,28 @@ export default class WrongAirportRule implements Rule {
   }
 
   violated(pirep: Pirep, data: Telemetry): RuleValue {
-    const actDest = data.runway?.icao
+    const actDest = pirep.arrivalAirport?.icao
+
+    // DEBUG: log what we actually receive so we can compare against the plan
+    Acars.AddPirepLog(
+      `[WRONG_AIRPORT debug] actDest=${JSON.stringify(actDest)} ` +
+        `flight.arrivalIcao=${JSON.stringify(pirep.flight?.arrivalIcao)} ` +
+        `flightPlan.arrivalAirport.icao=${JSON.stringify(pirep.flightPlan?.arrivalAirport?.icao)} ` +
+        `flight.altIcao=${JSON.stringify(pirep.flight?.altIcao)} ` +
+        `flightPlan.altIcao=${JSON.stringify(pirep.flightPlan?.altIcao)} ` +
+        `sbDest=${JSON.stringify(pirep.flightPlan?.simBriefFlightPlan?.destination?.icaoCode)} ` +
+        `sbAltn=${JSON.stringify(pirep.flightPlan?.simBriefFlightPlan?.alternate?.icaoCode)}`,
+    )
+
     if (!actDest) return
 
     const allowed = new Set<string>()
 
-    // Destination from bid/flight plan
-    if (pirep.arrivalAirport?.icao) allowed.add(pirep.arrivalAirport.icao)
+    // Destination from bid
+    if (pirep.flight?.arrivalIcao) allowed.add(pirep.flight.arrivalIcao)
+
+    // Destination from flight plan
+    if (pirep.flightPlan?.arrivalAirport?.icao) allowed.add(pirep.flightPlan.arrivalAirport.icao)
 
     // Alternate from bid
     if (pirep.flight?.altIcao) allowed.add(pirep.flight.altIcao)

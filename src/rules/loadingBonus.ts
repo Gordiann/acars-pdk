@@ -27,11 +27,6 @@ export default class PayloadRule implements Rule {
         ? data.payloadWeight.Kilograms
         : 0
 
-    Acars.AddPirepLogOnce(
-      'LOADING_BONUS_DEBUG',
-      `Loading debug: hasFlightPlan=${!!pirep.flightPlan}, simbriefId=${pirep.flightPlan?.simbriefId ?? 'null'}, hasSimBriefFP=${!!pirep.flightPlan?.simBriefFlightPlan}, fpPayload=${fpPayload}, cargoKg=${pirep.flightPlan?.cargoWeight?.Kilograms ?? 'null'}, paxCount=${pirep.flightPlan?.passengersCount ?? 'null'}, acPayload=${acPayload}`,
-    )
-
     if (fpPayload == 0 || acPayload == 0) {
       return
     }
