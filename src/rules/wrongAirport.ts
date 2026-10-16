@@ -4,7 +4,15 @@
  */
 import { PirepState } from '../defs'
 import { Meta, Rule, RuleValue } from '../types/rule'
-import { Telemetry, Pirep } from '../types/types'
+import { Telemetry, Pirep, Coords } from '../types/types'
+import { isNearAnyCoords, toCoords } from '../util/geo'
+
+/**
+ * How close (nautical miles) the touchdown point must be to an expected
+ * airport for us to treat the landing as correct even when the sim-reported
+ * runway ICAO doesn't match.
+ */
+const MAX_LANDING_DISTANCE_NM = 5
 
 export default class WrongAirportRule implements Rule {
   meta: Meta = {
@@ -62,9 +70,41 @@ export default class WrongAirportRule implements Rule {
 
     if (allowed.has(actDest)) return
 
+    // The sim-reported runway ICAO disagrees with the plan, but it can't be
+    // trusted on its own. Corroborate with the actual touchdown position: if we
+    // physically landed within range of an expected airport, it's a correct
+    // landing and the ICAO reading was stale/wrong — don't penalize.
+    //
+    // Note: only airports we can resolve coordinates for are checked (flight
+    // plan airport objects + SimBrief). An alternate known only by ICAO string
+    // can't be position-verified, so a stale ICAO on such a diversion may still
+    // be penalized.
+    if (isNearAnyCoords(data.location, this.expectedAirportCoords(pirep), MAX_LANDING_DISTANCE_NM)) {
+      return
+    }
+
     const list = Array.from(allowed).join(', ')
     return [
-      `Wrong airport! Landed at ${actDest}, allowed: ${list}. Penalty: `,
+      `Wrong airport! Landed at ${actDest}${this.formatLocation(data.location)}, allowed: ${list}. Penalty: `,
     ]
+  }
+
+  /** Coordinates of every destination/alternate airport we can resolve. */
+  private expectedAirportCoords(pirep: Pirep): (Coords | undefined)[] {
+    const sb = pirep.flightPlan?.simBriefFlightPlan
+    return [
+      // Destination / detected arrival airports from the flight plan
+      pirep.flightPlan?.arrivalAirport?.location,
+      pirep.arrivalAirport?.location,
+      // SimBrief destination / alternate carry their own coordinates
+      toCoords(sb?.destination?.latitude, sb?.destination?.longitude),
+      toCoords(sb?.alternate?.latitude, sb?.alternate?.longitude),
+    ]
+  }
+
+  /** Append the touchdown coordinates so auditors can verify the real location. */
+  private formatLocation(here?: Coords): string {
+    if (!here) return ''
+    return ` (${here.lat.toFixed(4)}, ${here.lon.toFixed(4)})`
   }
 }

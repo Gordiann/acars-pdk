@@ -3,7 +3,14 @@
  */
 import { PirepState } from '../defs'
 import { Meta, Rule, RuleValue } from '../types/rule'
-import { Telemetry, Pirep } from '../types/types'
+import { Telemetry, Pirep, Coords } from '../types/types'
+import { isNearAnyCoords, toCoords } from '../util/geo'
+
+/**
+ * How close (nautical miles) the touchdown point must be to the alternate for
+ * us to award the bonus even when the sim-reported runway ICAO doesn't match.
+ */
+const MAX_LANDING_DISTANCE_NM = 5
 
 export default class AlternateBonusRule implements Rule {
   meta: Meta = {
@@ -37,10 +44,27 @@ export default class AlternateBonusRule implements Rule {
 
     if (alternates.size === 0) return
 
-    if (!alternates.has(actDest)) return
+    // The sim-reported runway ICAO can be stale/wrong (e.g. in MSFS 2020 it may
+    // report the departure airport when the airport isn't cleanly in the sim
+    // navdata). If the ICAO doesn't match, fall back to the actual touchdown
+    // position before deciding the pilot did not land at the alternate.
+    if (
+      !alternates.has(actDest) &&
+      !isNearAnyCoords(data.location, this.alternateCoords(pirep), MAX_LANDING_DISTANCE_NM)
+    ) {
+      return
+    }
 
     return [
       `Alternate airport bonus! Alternate=${actDest}. Bonus: +`,
     ]
+  }
+
+  /** Coordinates of the alternate airport(s) we can resolve. */
+  private alternateCoords(pirep: Pirep): (Coords | undefined)[] {
+    const sb = pirep.flightPlan?.simBriefFlightPlan
+    // Only SimBrief carries alternate coordinates; a bid/flight-plan alternate
+    // known only by ICAO string can't be position-verified.
+    return [toCoords(sb?.alternate?.latitude, sb?.alternate?.longitude)]
   }
 }
