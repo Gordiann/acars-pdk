@@ -9,8 +9,8 @@ import { isNearAnyCoords, toCoords } from '../util/geo'
 
 /**
  * How close (nautical miles) the touchdown point must be to an expected
- * airport for us to treat the landing as correct even when the sim-reported
- * runway ICAO doesn't match.
+ * airport for us to treat the landing as correct even when the detected
+ * arrival ICAO doesn't match.
  */
 const MAX_LANDING_DISTANCE_NM = 5
 
@@ -29,18 +29,6 @@ export default class WrongAirportRule implements Rule {
 
   violated(pirep: Pirep, data: Telemetry): RuleValue {
     const actDest = pirep.arrivalAirport?.icao
-
-    // DEBUG: log what we actually receive so we can compare against the plan
-    Acars.AddPirepLog(
-      `[WRONG_AIRPORT debug] actDest=${JSON.stringify(actDest)} ` +
-        `flight.arrivalIcao=${JSON.stringify(pirep.flight?.arrivalIcao)} ` +
-        `flightPlan.arrivalAirport.icao=${JSON.stringify(pirep.flightPlan?.arrivalAirport?.icao)} ` +
-        `flight.altIcao=${JSON.stringify(pirep.flight?.altIcao)} ` +
-        `flightPlan.altIcao=${JSON.stringify(pirep.flightPlan?.altIcao)} ` +
-        `sbDest=${JSON.stringify(pirep.flightPlan?.simBriefFlightPlan?.destination?.icaoCode)} ` +
-        `sbAltn=${JSON.stringify(pirep.flightPlan?.simBriefFlightPlan?.alternate?.icaoCode)}`,
-    )
-
     if (!actDest) return
 
     const allowed = new Set<string>()
@@ -70,7 +58,7 @@ export default class WrongAirportRule implements Rule {
 
     if (allowed.has(actDest)) return
 
-    // The sim-reported runway ICAO disagrees with the plan, but it can't be
+    // The detected arrival ICAO disagrees with the plan, but it can't be
     // trusted on its own. Corroborate with the actual touchdown position: if we
     // physically landed within range of an expected airport, it's a correct
     // landing and the ICAO reading was stale/wrong — don't penalize.
