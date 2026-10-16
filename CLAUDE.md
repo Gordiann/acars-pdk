@@ -33,6 +33,8 @@ Copy `.env.example` to `.env` and set `ACARS_PROFILE_NAME`. The `dev` command us
 
 All source lives in `src/`. Each plugin is a class that exports as default and follows a specific interface.
 
+vmsACARS discovers plugins by scanning the directories declared in `src/package.json` (`config.aircraft/rules/scripts/sounds` → `aircraft`, `rules`, `scripts`, `sounds`). Every `.js` file in those directories is loaded as a plugin of that type, so **shared helper modules must not live there** — put them in a non-scanned directory (e.g. `src/util/`) and import them with a relative path. Runtime ESM imports are extensionless (e.g. `import { x } from '../util/geo'`, matching `../defs`); the ACARS module loader resolves them.
+
 ### 1. Aircraft Configurations (`src/aircraft/`)
 
 Extend `AircraftConfig` abstract class from `src/interface/aircraft.ts`. Map simulator-specific variables (LVars, datarefs, offsets) to standardized aircraft features.
@@ -55,6 +57,7 @@ Implement the `Rule` interface from `src/types/rule.d.ts`. Evaluate flight viola
   - `['message', points]` = violated with custom message/points
 - **`completed?(points, count, pirep, data)`** — optional post-violation callback
 - Check feature states via `data.features[AircraftFeature.X]`
+- **Airport/runway ICAO from the sim is unreliable.** `data.runway.icao` and `pirep.arrivalAirport.icao` can be stale or wrong at airports with poor/missing scenery (common in MSFS 2020 — e.g. the departure airport is reported at the destination). For landing-location rules, corroborate the ICAO against the actual touchdown position (`data.location` vs. airport coordinates; see `src/util/geo.ts`) before penalizing.
 
 ### 3. Callback Scripts (`src/scripts/`)
 
